@@ -1,0 +1,18 @@
+﻿<Window x:Class="MosquittoChat.ChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MosquittoChat"
+        mc:Ignorable="d"
+        Title="ChatWindow" Height="450" Width="800"
+        Closing="mainWindowClosing">
+    <Grid>
+        <TextBox x:Name="topic_textbox" HorizontalAlignment="Left" Margin="209,163,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="msg_textbox" HorizontalAlignment="Left" Margin="416,172,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Topic" HorizontalAlignment="Left" Margin="254,138,0,0" VerticalAlignment="Top"/>
+        <Label Content="Message" HorizontalAlignment="Left" Margin="463,151,0,0" VerticalAlignment="Top"/>
+        <Button Click="publishButtonClick" x:Name="Publish_button" Content="Publish" HorizontalAlignment="Left" Margin="428,244,0,0" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>
