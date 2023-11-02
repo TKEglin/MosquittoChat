@@ -5,11 +5,6 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MosquittoChat", "MosquittoChat\MosquittoChat.csproj", "{8D31571F-8BF2-4C15-BC3B-65BEBF046D72}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{A6F8E6ED-BAC1-4292-99A3-4125582CE174}"
-	ProjectSection(SolutionItems) = preProject
-		..\MosquittoChatLogoTransparent.png = ..\MosquittoChatLogoTransparent.png
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

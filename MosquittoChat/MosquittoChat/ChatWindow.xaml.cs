@@ -22,25 +22,25 @@ namespace MosquittoChat
     /// </summary>
     public partial class ChatWindow : Window
     {
-        public readonly MqttHandler mqttHandler;
+        private readonly MqttHandler mqttHandler;
+        private string activeTopic = "General"; // The default topic is "General"
+        private List<string> subscribedTopics = new() { "General" };
 
         public ChatWindow(MqttHandler mqttHandler)
         {
             this.mqttHandler = mqttHandler;
-
-
 
             InitializeComponent();
         }
 
         private void publishButtonClick(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Disconnecting from client and shutting down.");
-            mqttHandler.publish(topic_textbox.Text, msg_textbox.Text);
+            mqttHandler.publish(activeTopic, msg_textbox.Text);
         }
 
         private void mainWindowClosing(object sender, CancelEventArgs e)
         {
+            Debug.WriteLine("Disconnecting from client and shutting down.");
             mqttHandler.disconnect();
         }
     }

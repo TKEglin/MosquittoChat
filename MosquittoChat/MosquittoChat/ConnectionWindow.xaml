@@ -12,7 +12,7 @@
         <Label x:Name="port_label" Content="Port" HorizontalAlignment="Right" Margin="0,0,10,55" VerticalAlignment="Bottom" Height="26" Width="32"/>
         <TextBox x:Name="port_textbox" HorizontalAlignment="Right" Margin="0,0,10,37" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="185" Text="1883" Height="18"/>
         <TextBox x:Name="IP_textbox" HorizontalAlignment="Left" Margin="10,0,0,37" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="185" Text="192.168.0.60" Height="18"/>
-        <Image HorizontalAlignment="Center" Height="200" Margin="0,32,0,0" VerticalAlignment="Top" Width="300" Source="C:\Users\eglin\OneDrive\Uni\Distribuerede Systemer\Projekt3a\C#Client\MosquittoChatLogoTransparent.png" Stretch="Fill"/>
+        <Image HorizontalAlignment="Left" Height="200" Margin="45,19,0,0" VerticalAlignment="Top" Width="300" Source="/Images/MosquittoChatLogoTransparent.png" Stretch="Fill"/>
         <Button x:Name="closeButton" Click="closeButtonClick" Content="Close" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
         <Button x:Name="connectButton" Click="connectButtonClick" Content="Connect" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
 
