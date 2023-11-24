@@ -45,5 +45,10 @@ namespace MosquittoChat
 
             MessageBox.Show("Published Message to Topic");
         }
+
+        public void subscribe(string topic)
+        {
+            this.mqttClient.SubscribeAsync(topic);
+        }
     }
 }

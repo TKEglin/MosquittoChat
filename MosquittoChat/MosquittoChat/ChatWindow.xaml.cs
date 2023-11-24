@@ -22,6 +22,7 @@ namespace MosquittoChat
     /// </summary>
     public partial class ChatWindow : Window
     {
+
         private readonly MqttHandler mqttHandler;
         private string activeTopic = "General"; // The default topic is "General"
         private List<string> subscribedTopics = new() { "General" };
@@ -31,17 +32,47 @@ namespace MosquittoChat
             this.mqttHandler = mqttHandler;
 
             InitializeComponent();
+
+            updateTopicList();
         }
 
         private void publishButtonClick(object sender, RoutedEventArgs e)
         {
-            mqttHandler.publish(activeTopic, msg_textbox.Text);
+            var msg = msg_textbox.Text;
+            mqttHandler.publish(activeTopic, msg);
+        }
+        private void msg_textbox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                publishButtonClick(sender, e);
+            }
         }
 
         private void mainWindowClosing(object sender, CancelEventArgs e)
         {
             Debug.WriteLine("Disconnecting from client and shutting down.");
             mqttHandler.disconnect();
+        }
+
+        private void topicAddTextbox_KeyDown(object sender, KeyEventArgs e)
+        {
+            var topic = topicAddTextbox.Text;
+            if (e.Key == Key.Enter && !subscribedTopics.Contains(topic))
+            {
+                subscribedTopics.Add(topic);
+
+                updateTopicList();
+            }
+        }
+
+        private void updateTopicList()
+        {
+            subscribedTopicsList.Items.Clear();
+            foreach (var topic in subscribedTopics)
+            {
+                subscribedTopicsList.Items.Add(topic);
+            }
         }
     }
 }

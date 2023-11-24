@@ -29,6 +29,7 @@ namespace MosquittoChat
             Debug.WriteLine("Initializing MosquittoChat");
 
             InitializeComponent();
+
         }
 
         private void connectButtonClick(object sender, RoutedEventArgs e)
