@@ -36,10 +36,11 @@ namespace MosquittoChat
         {
             var IP = IP_textbox.Text;
             var port = Int32.Parse(port_textbox.Text);
+            var username = username_textbox.Text;
 
             this.mqttHandler.connect(IP, port);
 
-            var chatWindow = new ChatWindow(this.mqttHandler);
+            var chatWindow = new ChatWindow(this.mqttHandler, username);
             chatWindow.Show();
             this.Close();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,10 +17,37 @@ namespace MosquittoChat
     {
         private IMqttClient mqttClient;
 
+        public class MessageEventArgs
+        {
+            public MessageEventArgs(string msg, string topic)
+            {
+                Message = msg;
+                Topic = topic;
+            }
+            public string Message { get; set; }
+            public string Topic { get; set; }
+        }
+
+        public delegate void MessageEventHandler(MessageEventArgs e);
+        public event MessageEventHandler? MessageReceived;
+
+
         public MqttHandler()
         {
             var mqttFactory = new MqttFactory();
             this.mqttClient = mqttFactory.CreateMqttClient();
+
+            // When a message is received, the payload and topic is passed on to an external event handler
+            this.mqttClient.ApplicationMessageReceivedAsync += e =>
+            {
+                var Message = e.ApplicationMessage;
+                var Payload = Encoding.Default.GetString(Message.PayloadSegment);
+
+                this.MessageReceived?.Invoke(new MessageEventArgs(Payload, Message.Topic));
+
+                return Task.CompletedTask;
+            };
+
         }
 
         public void connect(string IP, int port)
@@ -41,9 +69,8 @@ namespace MosquittoChat
                 .WithPayload(msg)
                 .Build();
 
+            Debug.WriteLine($"Publishing to {topic} the message: {msg}");
             this.mqttClient.PublishAsync(mqttMessage, CancellationToken.None);
-
-            MessageBox.Show("Published Message to Topic");
         }
 
         public void subscribe(string topic)
