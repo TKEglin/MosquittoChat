@@ -31,6 +31,10 @@ namespace MosquittoChat
         private const string DefaultTopic = "General";
         private Dictionary<string, List<string>> subscribedTopics = new() { { DefaultTopic, new List<string>() } };
 
+        // The topic prefixes are used to group communication topics and avoid interference with other application using the network
+        private const string GeneralTopicPrefix = "MosquittoChat";
+        private const string MessageTopicPrefix = "Messaging";
+        private const string ConfigTopicPrefix = "Config";
         // The active topic is the topic that is currently visible in the message view of the UI
         private string activeTopic;
 
@@ -42,25 +46,29 @@ namespace MosquittoChat
             this.mqttHandler.MessageReceived += e =>
             {
                 // When message received, message is added to the list of the corresponding topic:
-                subscribedTopics[e.Topic].Add(e.Message);
+                var topic = RetrieveTopicString(e.Topic);
+                subscribedTopics[topic].Add(e.Message);
                 // UI is only updated if the message belongs to the active topic
-                if (activeTopic == e.Topic) 
+                if (activeTopic == topic)
                     AddMessageToMessageView(e.Message);
             };
 
-            this.activeTopic = subscribedTopics.Keys.First();
-            this.mqttHandler.subscribe(activeTopic);
+            this.activeTopic = DefaultTopic;
 
             // UI
             InitializeComponent();
-            UpdateTopicList();
-            subscribedTopicsListBox.SelectedItem = subscribedTopicsListBox.Items[0];
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            AddTopicAndSetActive(DefaultTopic);
+            Subscribe(DefaultTopic);
         }
 
         private void PublishButtonClick(object sender, RoutedEventArgs e)
         {
             var msg = GenerateMessageText(msg_textbox.Text);
-            mqttHandler.publish(activeTopic, msg);
+            mqttHandler.publish(GenerateMessageTopic(activeTopic), msg);
             msg_textbox.Text = "";
         }
         private void msg_textbox_KeyDown(object sender, KeyEventArgs e)
@@ -78,6 +86,31 @@ namespace MosquittoChat
             return msg;
         }
 
+        /// <summary>
+        /// Subscribes to the given topic using the mqtt handler.
+        /// </summary>
+        private void Subscribe(string topic)
+        {
+            this.mqttHandler.subscribe(GenerateMessageTopic(topic));
+        }
+
+        /// <summary>
+        /// Generates a full topic string using the general and message prefixes
+        /// </summary>
+        public string GenerateMessageTopic(string topic)
+        {
+            return $"{GeneralTopicPrefix}/{MessageTopicPrefix}/{topic}";
+        }
+
+        /// <summary>
+        /// Retrieves the specific topic of a full topic string
+        /// </summary>
+        private string RetrieveTopicString(string topic)
+        {
+            var topicComponents = topic.Split("/");
+            return topicComponents.Last();
+        }
+
         private void MainWindowClosing(object sender, CancelEventArgs e)
         {
             Debug.WriteLine("Disconnecting from client and shutting down.");
@@ -90,27 +123,29 @@ namespace MosquittoChat
             if (e.Key == Key.Enter && !subscribedTopics.ContainsKey(topic) && topic.Length > 0)
             {
                 topicAddTextbox.Text = string.Empty;
-
-                subscribedTopics[topic] = new List<string>();
-                this.mqttHandler.subscribe(topic);
-                UpdateTopicList();
+                AddTopicAndSetActive(topic);
+                Subscribe(topic);
             }
         }
 
-        private void UpdateTopicList()
+        /// <summary>
+        /// Adds a topic to the UI listbox, subscribes using the handler and sets the topic active.
+        /// Should only be used once on the creation of the topic.
+        /// </summary>
+        private void AddTopicAndSetActive(string topic)
         {
-            // Note: the dispatcher is needed to avoid threading issues
+            //Subscribing
+            subscribedTopics[topic] = new List<string>();
+
+            //Adding to UI
             this.Dispatcher.Invoke(() =>
             {
-                subscribedTopicsListBox.Items.Clear();
-                foreach (var topic in subscribedTopics.Keys)
-                {
-                    subscribedTopicsListBox.Items.Add(topic);
-                    //Setting selected to last inserted if it is the currently active topic
-                    if (topic == activeTopic)
-                        subscribedTopicsListBox.SelectedIndex = subscribedTopicsListBox.Items.Count - 1;
-                }
+                subscribedTopicsListBox.Items.Add(topic);
+                subscribedTopicsListBox.SelectedIndex = subscribedTopicsListBox.Items.Count - 1;
             });
+
+            //Setting active
+            activeTopic = topic;
         }
 
         private void AddMessageToMessageView(string message)
@@ -133,10 +168,13 @@ namespace MosquittoChat
             });
         }
 
-        private void subscribedTopicsListBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void subscribedTopicsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            activeTopic = subscribedTopicsListBox.SelectedItem.ToString() ?? DefaultTopic;
-            ReloadMessageView();
+            if (e.AddedItems[0] != null && (string)e.AddedItems[0]! != null)
+            {
+                activeTopic = (string)e.AddedItems[0]!;
+                ReloadMessageView();
+            }
         }
     }
 }
