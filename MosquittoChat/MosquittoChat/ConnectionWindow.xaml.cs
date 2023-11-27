@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Diagnostics;
+using System.Threading;
 
 
 namespace MosquittoChat
@@ -21,15 +22,13 @@ namespace MosquittoChat
     /// </summary>
     public partial class ConnectionWindow : Window
     {
-
-        private readonly MqttHandler mqttHandler = new MqttHandler();
+        private MqttHandler mqttHandler = new MqttHandler();
 
         public ConnectionWindow()
         {
             Debug.WriteLine("Initializing MosquittoChat");
 
             InitializeComponent();
-
         }
 
         private void connectButtonClick(object sender, RoutedEventArgs e)
@@ -38,11 +37,57 @@ namespace MosquittoChat
             var port = Int32.Parse(port_textbox.Text);
             var username = username_textbox.Text;
 
-            this.mqttHandler.connect(IP, port);
+            try
+            {
+                this.mqttHandler.connect(IP, port);
 
-            var chatWindow = new ChatWindow(this.mqttHandler, username);
-            chatWindow.Show();
-            this.Close();
+                this.Cursor = Cursors.Wait;
+                Thread.Sleep(500);
+
+                // Verifying that messages can be published to server:
+                this.mqttHandler.publish(TopicTypes.GenerateConfigTopic(TopicTypes.ConnectionCheck), username);
+
+                // username uniqueness test
+                bool usernameValid = true;
+                this.mqttHandler.subscribe(TopicTypes.GenerateConfigTopic($"{TopicTypes.UsernameUniquenessCheck}/{username}"));
+                this.mqttHandler.MessageReceived += e =>
+                {
+                    //Assumptions:
+                    // 1. mqttHandler is only subscribed to the UniqueCheck/username topic above
+                    // 2. A message will only be published to this topic if the username is taken
+
+                    usernameValid = false; // Note: potential threading problems
+                };
+                this.mqttHandler.publish(TopicTypes.GenerateConfigTopic(TopicTypes.UsernameUniquenessCheck), username);
+
+                // Waiting a certain amount of time for a response
+                //      Note: Better solution would be to wait for event with a timeout.
+                Thread.Sleep(500);
+                this.Cursor = null;
+
+                if(!usernameValid)
+                {
+                    this.mqttHandler.unsubscribe($"{TopicTypes.UsernameUniquenessCheck}/{username}");
+                    throw new Exception("Username is taken. Please choose another username.");
+                }
+
+                // Initializing client
+                var chatWindow = new ChatWindow(this.mqttHandler, username);
+                chatWindow.Show();
+
+                // Normal operation:
+                //this.Close();
+
+                // Multiclient testing:
+                this.mqttHandler = new MqttHandler();
+            }
+            catch(Exception ex)
+            { 
+                MessageBox.Show($"There was a problem connecting to the server. Please try again.\n\nError: {ex.Message}");
+
+                if (this.mqttHandler.IsConnected)
+                    this.mqttHandler.disconnect();
+            }
         }
 
         private void closeButtonClick(object sender, RoutedEventArgs e)

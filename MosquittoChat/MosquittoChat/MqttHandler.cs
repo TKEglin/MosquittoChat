@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Server;
@@ -50,6 +51,11 @@ namespace MosquittoChat
 
         }
 
+        public bool IsConnected 
+        { 
+            get { return mqttClient.IsConnected; }
+        }
+
         public void connect(string IP, int port)
         {
             var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer(IP, port).Build();
@@ -67,6 +73,7 @@ namespace MosquittoChat
             var mqttMessage = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
                 .WithPayload(msg)
+                .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                 .Build();
 
             Debug.WriteLine($"Publishing to {topic} the message: {msg}");
@@ -75,7 +82,14 @@ namespace MosquittoChat
 
         public void subscribe(string topic)
         {
+            Debug.WriteLine($"Subscribing to {topic}.");
             this.mqttClient.SubscribeAsync(topic);
+        }
+
+        public void unsubscribe(string topic)
+        {
+            Debug.WriteLine($"Unsubscribing from {topic}.");
+            this.mqttClient?.UnsubscribeAsync(topic);
         }
     }
 }
