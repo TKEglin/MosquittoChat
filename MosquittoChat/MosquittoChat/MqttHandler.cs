@@ -26,7 +26,7 @@ namespace MosquittoChat
                 Topic = topic;
             }
             public string Message { get; set; }
-            public string Topic { get; set; }
+            public string Topic   { get; set; }
         }
 
         public delegate void MessageEventHandler(MessageEventArgs e);
@@ -68,6 +68,9 @@ namespace MosquittoChat
             mqttClient.DisconnectAsync(new MqttClientDisconnectOptionsBuilder().WithReason(MqttClientDisconnectOptionsReason.NormalDisconnection).Build());
         }
 
+        /// <summary>
+        /// Publishes a message to the given topic. QoS level is "Exactly Once".
+        /// </summary>
         public void publish(string topic, string msg)
         {
             var mqttMessage = new MqttApplicationMessageBuilder()

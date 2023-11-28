@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace MosquittoChat
 {
+    /// <summary>
+    /// A static class providing topic name constants and topic generation methods.
+    /// </summary>
     public static class TopicTypes
     {
         // The topic prefixes are used to group communication topics and avoid interference with other application using the network
@@ -26,18 +30,18 @@ namespace MosquittoChat
         /// </para> <para>
         /// A client with an identical username responding to this topic should publish to 
         ///     {TopicTypes.UsernameUniquenessCheck}/{username}.
-        /// that is, append the username to the GenerateConfigTopic parameter string.
+        /// that is, append the username to the GenConfigTopic parameter string.
         /// </para> </summary>
         public const string UsernameUniquenessCheck = "UsernameUniquenessCheck";
         /// <summary>
         /// Is used when a client connects to a new topic. The message must be the name of the topic. 
-        /// Response will arrive on the TopicTypes.ConnectionSyncRequest topic.
+        /// Response will arrive on the TopicTypes.ConnectionSyncRequest topic in the form of a Topic datatype JSON string.
         /// </summary>
-        public const string ConnectionSyncRequest = "ConnectionSyncRequest";
+        public const string TopicSyncRequest = "TopicSyncRequest";
         /// <summary>
         /// Response topic for ConnectionSyncRequest. The message will be a serialized json string of the class "Topic".
         /// </summary>
-        public const string ConnectionSyncResponse = "ConnectionSyncResponse";
+        public const string TopicSyncResponse = "TopicSyncResponse";
         /// <summary>
         /// Is used when a client disconnects. The message should be the username of the disconnecting client.
         /// </summary>
@@ -49,7 +53,7 @@ namespace MosquittoChat
         /// <summary>
         /// Generates a full topic string using the general and message prefixes and a specific topic
         /// </summary>
-        public static string GenerateMessageTopic(string topic)
+        public static string GenMessageTopic(string topic)
         {
             return $"{GeneralTopicPrefix}/{MessageTopicPrefix}/{topic}";
         }
@@ -58,7 +62,7 @@ namespace MosquittoChat
         /// Generates a topic string using General and Config prefixes with no specific topic.
         /// Should only be used to subcribe, not to publish, since it is assumed that published messages have a specific topic.
         /// </summary>
-        public static string GenerateConfigTopic()
+        public static string GenConfigTopic()
         {
             return $"{GeneralTopicPrefix}/{ConfigTopicPrefix}";
         }
@@ -66,31 +70,40 @@ namespace MosquittoChat
         /// <summary>
         /// Generates a topic string using General and Config prefixes and a specific topic.
         /// </summary>
-        public static string GenerateConfigTopic(string topic)
+        public static string GenConfigTopic(string topic)
         {
             return $"{GeneralTopicPrefix}/{ConfigTopicPrefix}/{topic}";
         }
     }
 
     /// <summary>
-    /// The topic is used to store information about a given topic.
+    /// The topic room datatype is used to store information about a given topic.
     /// </summary>
-    public class Topic
+    public class TopicRoom
     {
-        public Topic(string topic) { this.topic = topic; }
-
-        public string topic;
-        public List<string> users = new();
-        public List<string> messages = new();
-
-        public string SerializeJSON(Topic msg)
-        {
-            return JsonSerializer.Serialize(msg);
+        public TopicRoom(string topic) 
+        { 
+            this.Topic = topic;
+            this.JoinTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            this.Users = new();
+            this.Messages = new();
         }
 
-        public Topic DeserializeJSON(string json)
+        public string Topic { get; set; }
+        public long JoinTime { get; set; }
+        public List<string> Users { get; set; }
+        public List<string> Messages { get; set; }
+
+        public string SerializeJSON()
         {
-            return JsonSerializer.Deserialize<Topic>(json)!;
+            string TopicJSON = JsonSerializer.Serialize(this);
+            Debug.WriteLine($"Generated TopicRoomJSON: {TopicJSON}");
+            return TopicJSON;
+        }
+
+        public static TopicRoom DeserializeJSON(string json)
+        {
+            return JsonSerializer.Deserialize<TopicRoom>(json)!;
         }
     }
 }

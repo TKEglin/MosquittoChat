@@ -21,7 +21,9 @@
         </Grid.ColumnDefinitions>
         <TextBox x:Name="msg_textbox" Margin="10,0,58,10" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Grid.Column="1" Height="20" Grid.Row="1"
                  KeyDown="msg_textbox_KeyDown"/>
-        <TextBox x:Name="topicAddTextbox" Margin="10,0,10,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="18" Grid.Column="0" Grid.Row="1"
+        <TextBox x:Name="topicAddTextbox" Margin="10,0,10,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="18" 
+                 Grid.Column="0" Grid.Row="1"
+                 ToolTip="Press enter to add."
                  KeyDown="TopicAddTextbox_KeyDown"/>
         <Label Content="Add Topic" HorizontalAlignment="Center" Margin="0,0,0,28" VerticalAlignment="Bottom" Height="26" Grid.Row="1"/>
         <Button Click="PublishButtonClick" x:Name="Publish_button" Content="Publish" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Grid.Column="1" Height="20" Width="44" Grid.Row="1"/>

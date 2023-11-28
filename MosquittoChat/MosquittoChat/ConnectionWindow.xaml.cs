@@ -45,11 +45,11 @@ namespace MosquittoChat
                 Thread.Sleep(500);
 
                 // Verifying that messages can be published to server:
-                this.mqttHandler.publish(TopicTypes.GenerateConfigTopic(TopicTypes.ConnectionCheck), username);
+                this.mqttHandler.publish(TopicTypes.GenConfigTopic(TopicTypes.ConnectionCheck), username);
 
                 // username uniqueness test
                 bool usernameValid = true;
-                this.mqttHandler.subscribe(TopicTypes.GenerateConfigTopic($"{TopicTypes.UsernameUniquenessCheck}/{username}"));
+                this.mqttHandler.subscribe(TopicTypes.GenConfigTopic($"{TopicTypes.UsernameUniquenessCheck}/{username}"));
                 this.mqttHandler.MessageReceived += e =>
                 {
                     //Assumptions:
@@ -58,7 +58,7 @@ namespace MosquittoChat
 
                     usernameValid = false; // Note: potential threading problems
                 };
-                this.mqttHandler.publish(TopicTypes.GenerateConfigTopic(TopicTypes.UsernameUniquenessCheck), username);
+                this.mqttHandler.publish(TopicTypes.GenConfigTopic(TopicTypes.UsernameUniquenessCheck), username);
 
                 // Waiting a certain amount of time for a response
                 //      Note: Better solution would be to wait for event with a timeout.
