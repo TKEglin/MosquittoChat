@@ -45,20 +45,20 @@ namespace MosquittoChat
                 Thread.Sleep(500);
 
                 // Verifying that messages can be published to server:
-                this.mqttHandler.publish(TopicTypes.GenConfigTopic(TopicTypes.ConnectionCheck), username);
+                this.mqttHandler.publish(Topics.GenConfigTopic(Topics.ConnectionCheck), username);
 
                 // username uniqueness test
                 bool usernameValid = true;
-                this.mqttHandler.subscribe(TopicTypes.GenConfigTopic($"{TopicTypes.UsernameUniquenessCheck}/{username}"));
+                this.mqttHandler.subscribe(Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{username}"));
                 this.mqttHandler.MessageReceived += e =>
                 {
                     //Assumptions:
-                    // 1. mqttHandler is only subscribed to the UniqueCheck/username topic above
+                    // 1. mqttHandler is subscribed to no other topic than the UniqueCheck/username topic above
                     // 2. A message will only be published to this topic if the username is taken
 
                     usernameValid = false; // Note: potential threading problems
                 };
-                this.mqttHandler.publish(TopicTypes.GenConfigTopic(TopicTypes.UsernameUniquenessCheck), username);
+                this.mqttHandler.publish(Topics.GenConfigTopic(Topics.UsernameUniquenessCheck), username);
 
                 // Waiting a certain amount of time for a response
                 //      Note: Better solution would be to wait for event with a timeout.
@@ -67,7 +67,7 @@ namespace MosquittoChat
 
                 if(!usernameValid)
                 {
-                    this.mqttHandler.unsubscribe($"{TopicTypes.UsernameUniquenessCheck}/{username}");
+                    this.mqttHandler.unsubscribe($"{Topics.UsernameUniquenessCheck}/{username}");
                     throw new Exception("Username is taken. Please choose another username.");
                 }
 

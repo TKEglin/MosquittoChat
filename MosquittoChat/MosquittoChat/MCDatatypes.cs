@@ -11,7 +11,7 @@ namespace MosquittoChat
     /// <summary>
     /// A static class providing topic name constants and topic generation methods.
     /// </summary>
-    public static class TopicTypes
+    public static class Topics
     {
         // The topic prefixes are used to group communication topics and avoid interference with other application using the network
         public const string GeneralTopicPrefix = "MosquittoChat";
@@ -29,17 +29,18 @@ namespace MosquittoChat
         /// treat username as valid. 
         /// </para> <para>
         /// A client with an identical username responding to this topic should publish to 
-        ///     {TopicTypes.UsernameUniquenessCheck}/{username}.
+        ///     {Topics.UsernameUniquenessCheck}/{username}.
         /// that is, append the username to the GenConfigTopic parameter string.
         /// </para> </summary>
         public const string UsernameUniquenessCheck = "UsernameUniquenessCheck";
         /// <summary>
-        /// Is used when a client connects to a new topic. The message must be the name of the topic. 
-        /// Response will arrive on the TopicTypes.ConnectionSyncRequest topic in the form of a Topic datatype JSON string.
+        /// Is used when a client connects to a new topic.The message must be the name of the topic followed 
+        /// by the client username in the format "topic/username".
+        /// Response will arrive on the Topics.ConnectionSyncRequest topic in the form of a Topic datatype JSON string.
         /// </summary>
         public const string TopicSyncRequest = "TopicSyncRequest";
         /// <summary>
-        /// Response topic for ConnectionSyncRequest. The message will be a serialized json string of the class "Topic".
+        /// Response topic for ConnectionSyncRequest. The message must be a serialized json string of the class "Topic".
         /// </summary>
         public const string TopicSyncResponse = "TopicSyncResponse";
         /// <summary>
@@ -84,13 +85,16 @@ namespace MosquittoChat
         public TopicRoom(string topic) 
         { 
             this.Topic = topic;
-            this.JoinTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            this.CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             this.Users = new();
             this.Messages = new();
         }
 
         public string Topic { get; set; }
-        public long JoinTime { get; set; }
+        /// <summary>
+        /// The Unix millisecond timestamp of the TopicRoom creation.
+        /// </summary>
+        public long CreationTime { get; set; }
         public List<string> Users { get; set; }
         public List<string> Messages { get; set; }
 

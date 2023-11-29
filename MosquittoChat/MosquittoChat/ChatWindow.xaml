@@ -7,29 +7,30 @@
         mc:Ignorable="d"
         Title="Mosquitto Chat" Icon="/Images/MosquittoChatLogoTransparent.png"
         Height="450" Width="800"
-        MinWidth="400" MinHeight="300"
+        MinHeight="390" MinWidth="600"
         Loaded="Window_Loaded"
         Closing="MainWindowClosing">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="90"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="90" MinHeight="90"/>
+            <RowDefinition Height="*" MinHeight="120"/>
+            <RowDefinition Height="*" MinHeight="120"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="140"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="140" MinWidth="140" MaxWidth="300"/>
+            <ColumnDefinition Width="*" MinWidth="200"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="msg_textbox" Margin="10,0,58,10" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Grid.Column="1" Height="20" Grid.Row="1"
+        <TextBox x:Name="msg_textbox" Margin="10,0,58,10" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Grid.Column="1" Height="20" Grid.Row="2"
                  KeyDown="msg_textbox_KeyDown"/>
         <TextBox x:Name="topicAddTextbox" Margin="10,0,10,10" TextWrapping="Wrap" VerticalAlignment="Bottom" Height="18" 
                  Grid.Column="0" Grid.Row="1"
                  ToolTip="Press enter to add."
                  KeyDown="TopicAddTextbox_KeyDown"/>
         <Label Content="Add Topic" HorizontalAlignment="Center" Margin="0,0,0,28" VerticalAlignment="Bottom" Height="26" Grid.Row="1"/>
-        <Button Click="PublishButtonClick" x:Name="Publish_button" Content="Publish" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Grid.Column="1" Height="20" Width="44" Grid.Row="1"/>
-        <Label x:Name="usersLabel" Content="Subscribed Topics" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.198,-0.107" Height="26" Grid.Row="1"/>
+        <Button Click="PublishButtonClick" x:Name="Publish_button" Content="Publish" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Grid.Column="1" Height="20" Width="44" Grid.Row="2"/>
+        <Label x:Name="subscribedTopicsLabel" Content="Subscribed Topics" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="0.198,-0.107" Height="26" Grid.Row="1"/>
         <Image Margin="10,10,10,10" Stretch="Uniform" Source="/Images/MosquittoChatLogoTransparent.png"/>
-        <ListBox x:Name="messageViewListBox" Grid.Column="1" Margin="10,10,10,35" Grid.RowSpan="2">
+        <ListBox x:Name="messageViewListBox" Grid.Column="1" Margin="10,10,10,35" Grid.RowSpan="3">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Setter Property="Focusable" Value="False"/>
@@ -37,7 +38,10 @@
                 </Style>
             </ListBox.ItemContainerStyle>
         </ListBox>
-        <ListBox SelectionChanged="subscribedTopicsListBox_SelectionChanged" x:Name="subscribedTopicsListBox" Grid.Row="1" Margin="10,26,10,54"/>
-        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Margin="0,10,0,10" Grid.RowSpan="2" Width="2"/>
+        <ListBox SelectionChanged="subscribedTopicsListBox_SelectionChanged" x:Name="subscribedTopicsListBox" Grid.Row="1" Margin="10,26,10,54" Grid.RowSpan="1"/>
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Margin="0,10,0,10" Grid.RowSpan="3" Width="2"/>
+        <GridSplitter HorizontalAlignment="Stretch" Height="2" Margin="10,0,10,0" Grid.Row="2" VerticalAlignment="Top"/>
+        <Label x:Name="UsersLabel" Content="Users" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="0.198,-0.107" Height="26" Grid.Row="2" Margin="0,0,0,0"/>
+        <ListBox SelectionChanged="subscribedTopicsListBox_SelectionChanged" x:Name="ConnectedUsersListBox" Grid.Row="2" Margin="10,31,10,10" Grid.RowSpan="1"/>
     </Grid>
 </Window>
