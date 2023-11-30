@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Windows.Interop;
+using System.Threading;
 
 namespace MosquittoChat
 {
@@ -22,7 +23,7 @@ namespace MosquittoChat
     /// </summary>
     public partial class ChatWindow : Window
     {
-        private readonly MqttHandler mqttHandler;
+        private readonly MqttClient mqttClient;
         private readonly string username;
 
         // Topic threads are stored in a dictionary that ties topic names to TopicRooms
@@ -35,17 +36,19 @@ namespace MosquittoChat
         // The active topic is the topic that is currently visible in the message view of the UI
         private string activeTopic;
 
-        public ChatWindow(MqttHandler mqttHandler, string username)
+        public ChatWindow(MqttClient mqttClient, string username)
         {
-            this.mqttHandler = mqttHandler;
+            this.mqttClient = mqttClient;
             this.username = username;
 
-            this.mqttHandler.MessageReceived += MessageReceivedHandler;
+            this.mqttClient.MessageReceived += MessageReceivedHandler;
 
             this.activeTopic = Topics.DefaultMessagingTopic;
 
             // UI
             InitializeComponent();
+
+            Title = "MosquittoChat | " + username;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -56,20 +59,21 @@ namespace MosquittoChat
             SubscribeToConfig();
         }
 
-        private void MessageReceivedHandler(MqttHandler.MessageEventArgs e)
+        private void MessageReceivedHandler(MqttClient.MessageEventArgs e)
         {
             var topicComponents = e.Topic.Split("/");
             var specificTopic = topicComponents.Last();
 
             if (e.Topic == Topics.GenConfigTopic(specificTopic))
             {
-                // If topic is configuration topic, check for which specific config topic is sent
-                switch (specificTopic)
+                Debug.WriteLine($"Client \"{this.username}\" received \"{specificTopic}\"");
+                    // If topic is configuration topic, check for which specific config topic is sent
+                    switch (specificTopic)
                 {
                     case Topics.UsernameUniquenessCheck:
                         if (e.Message == this.username)
                         {
-                            this.mqttHandler.publish(
+                            this.mqttClient.publish(
                                 Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{this.username}"),
                                 $"Username \"{this.username}\" is taken."
                             );
@@ -83,14 +87,14 @@ namespace MosquittoChat
 
                         if (this.connectedRooms.ContainsKey(syncTopic))
                         {
-
                             // Sending client's username is added to the topic room
-                            connectedRooms[syncTopic].Users.Add(syncUsername);
+                            if(!connectedRooms[syncTopic].Users.Contains(syncUsername))
+                                connectedRooms[syncTopic].Users.Add(syncUsername);
                             ReloadUsersView();
 
                             // Sending room data to requesting client:
                             var TopicJSON = connectedRooms[syncTopic].SerializeJSON();
-                            this.mqttHandler.publish(Topics.GenConfigTopic(Topics.TopicSyncResponse), TopicJSON);
+                            this.mqttClient.publish(Topics.GenConfigTopic(Topics.TopicSyncResponse), TopicJSON);
                         }
                         break;
 
@@ -115,7 +119,7 @@ namespace MosquittoChat
                         foreach(var r in connectedRooms.Values)
                         {
                             var disconnectingUsername = e.Message;
-                            if(r.Users.Contains(disconnectingUsername)) 
+                            //if(r.Users.Contains(disconnectingUsername)) 
                             {
                                 r.Users.Remove(disconnectingUsername);
                                 ReloadUsersView();
@@ -136,13 +140,13 @@ namespace MosquittoChat
 
         private void SubscribeToConfig()
         {
-            this.mqttHandler.subscribe($"{Topics.GenConfigTopic()}/#");
+            this.mqttClient.subscribe($"{Topics.GenConfigTopic()}/#");
         }
 
         private void PublishButtonClick(object sender, RoutedEventArgs e)
         {
             var msg = GenerateMessageText(msg_textbox.Text);
-            mqttHandler.publish(Topics.GenMessageTopic(activeTopic), msg);
+            mqttClient.publish(Topics.GenMessageTopic(activeTopic), msg);
             msg_textbox.Text = "";
         }
         private void msg_textbox_KeyDown(object sender, KeyEventArgs e)
@@ -161,19 +165,21 @@ namespace MosquittoChat
         }
 
         /// <summary>
-        /// Subscribes to the given topic using the mqtt handler.
+        /// Subscribes to the given topic using the mqtt client.
         /// </summary>
         private void SubscribeToMessages(string topic)
         {
-            this.mqttHandler.subscribe(Topics.GenMessageTopic(topic));
+            this.mqttClient.subscribe(Topics.GenMessageTopic(topic));
         }
 
 
         private void MainWindowClosing(object sender, CancelEventArgs e)
         {
             Debug.WriteLine("Disconnecting from client and shutting down.");
-            mqttHandler.publish(Topics.GenConfigTopic(Topics.ClientDisconnect), this.username);
-            mqttHandler.disconnect();
+            mqttClient.publish(Topics.GenConfigTopic(Topics.ClientDisconnect), this.username);
+            // Sleeping so client has time to publish:
+            Thread.Sleep(MCConsts.NetworkTimeLimit);
+            mqttClient.disconnect();
         }
 
         private void TopicAddTextbox_KeyDown(object sender, KeyEventArgs e)
@@ -210,7 +216,7 @@ namespace MosquittoChat
                 subscribedTopicsListBox.SelectedIndex = subscribedTopicsListBox.Items.Count - 1;
 
                 // Topic sync request is sent. The client will update the topic async if a sync response is received.
-                this.mqttHandler.publish(Topics.GenConfigTopic(Topics.TopicSyncRequest), $"{topic}/{this.username}");
+                this.mqttClient.publish(Topics.GenConfigTopic(Topics.TopicSyncRequest), $"{topic}/{this.username}");
             });
 
             //Setting active

@@ -22,7 +22,7 @@ namespace MosquittoChat
     /// </summary>
     public partial class ConnectionWindow : Window
     {
-        private MqttHandler mqttHandler = new MqttHandler();
+        private MqttClient mqttClient = new();
 
         public ConnectionWindow()
         {
@@ -39,54 +39,57 @@ namespace MosquittoChat
 
             try
             {
-                this.mqttHandler.connect(IP, port);
+                if (username.Length > 25)
+                    throw new Exception("Username cannot be longer than 25 characters.");
+
+                this.mqttClient.connect(IP, port);
 
                 this.Cursor = Cursors.Wait;
                 Thread.Sleep(500);
 
                 // Verifying that messages can be published to server:
-                this.mqttHandler.publish(Topics.GenConfigTopic(Topics.ConnectionCheck), username);
+                this.mqttClient.publish(Topics.GenConfigTopic(Topics.ConnectionCheck), username);
 
                 // username uniqueness test
                 bool usernameValid = true;
-                this.mqttHandler.subscribe(Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{username}"));
-                this.mqttHandler.MessageReceived += e =>
+                this.mqttClient.subscribe(Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{username}"));
+                this.mqttClient.MessageReceived += e =>
                 {
                     //Assumptions:
-                    // 1. mqttHandler is subscribed to no other topic than the UniqueCheck/username topic above
+                    // 1. mqttClient is subscribed to no other topic than the UniqueCheck/username topic above
                     // 2. A message will only be published to this topic if the username is taken
 
                     usernameValid = false; // Note: potential threading problems
                 };
-                this.mqttHandler.publish(Topics.GenConfigTopic(Topics.UsernameUniquenessCheck), username);
+                this.mqttClient.publish(Topics.GenConfigTopic(Topics.UsernameUniquenessCheck), username);
 
                 // Waiting a certain amount of time for a response
                 //      Note: Better solution would be to wait for event with a timeout.
-                Thread.Sleep(500);
+                Thread.Sleep(MCConsts.NetworkTimeLimit);
                 this.Cursor = null;
 
                 if(!usernameValid)
                 {
-                    this.mqttHandler.unsubscribe($"{Topics.UsernameUniquenessCheck}/{username}");
+                    this.mqttClient.unsubscribe($"{Topics.UsernameUniquenessCheck}/{username}");
                     throw new Exception("Username is taken. Please choose another username.");
                 }
 
                 // Initializing client
-                var chatWindow = new ChatWindow(this.mqttHandler, username);
+                var chatWindow = new ChatWindow(this.mqttClient, username);
                 chatWindow.Show();
 
                 // Normal operation:
-                //this.Close();
+                this.Close();
 
                 // Multiclient testing:
-                this.mqttHandler = new MqttHandler();
+                //this.mqttClient = new MqttClient();
             }
             catch(Exception ex)
             { 
                 MessageBox.Show($"There was a problem connecting to the server. Please try again.\n\nError: {ex.Message}");
 
-                if (this.mqttHandler.IsConnected)
-                    this.mqttHandler.disconnect();
+                if (this.mqttClient.IsConnected)
+                    this.mqttClient.disconnect();
             }
         }
 
