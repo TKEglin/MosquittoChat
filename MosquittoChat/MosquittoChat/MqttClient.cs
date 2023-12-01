@@ -14,7 +14,7 @@ using MQTTnet.Server;
 
 namespace MosquittoChat
 {
-    public class MqttHandler
+    public class MqttClient
     {
         private IMqttClient mqttClient;
 
@@ -33,7 +33,7 @@ namespace MosquittoChat
         public event MessageEventHandler? MessageReceived;
 
 
-        public MqttHandler()
+        public MqttClient()
         {
             var mqttFactory = new MqttFactory();
             this.mqttClient = mqttFactory.CreateMqttClient();

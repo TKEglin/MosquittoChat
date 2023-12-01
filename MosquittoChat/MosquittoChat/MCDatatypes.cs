@@ -9,6 +9,17 @@ using System.Diagnostics;
 namespace MosquittoChat
 {
     /// <summary>
+    /// Mosquitto Chat constants
+    /// </summary>
+    public static class MCConsts
+    {
+        /// <summary>
+        /// The time any network action can take without breaking functionality. Unit is milliseconds.
+        /// </summary>
+        public const int NetworkTimeLimit = 300;
+    }
+
+    /// <summary>
     /// A static class providing topic name constants and topic generation methods.
     /// </summary>
     public static class Topics
