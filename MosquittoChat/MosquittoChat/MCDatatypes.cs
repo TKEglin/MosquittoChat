@@ -13,7 +13,7 @@ namespace MosquittoChat
     /// </summary>
     public static class Topics
     {
-        // The topic prefixes are used to group communication topics and avoid interference with other application using the network
+        // The topic prefixes are used to group communication topics and avoid interference from other applications using the network
         public const string GeneralTopicPrefix = "MosquittoChat";
         public const string MessageTopicPrefix = "Messaging";
         public const string ConfigTopicPrefix  = "Config";
@@ -34,13 +34,13 @@ namespace MosquittoChat
         /// </para> </summary>
         public const string UsernameUniquenessCheck = "UsernameUniquenessCheck";
         /// <summary>
-        /// Is used when a client connects to a new topic.The message must be the name of the topic followed 
+        /// Is used when a client connects to a new topic. The message must be the name of the topic followed 
         /// by the client username in the format "topic/username".
-        /// Response will arrive on the Topics.ConnectionSyncRequest topic in the form of a Topic datatype JSON string.
+        /// Response will arrive on the Topics.ConnectionSyncRequest topic in the form of a TopicRoom datatype JSON string.
         /// </summary>
         public const string TopicSyncRequest = "TopicSyncRequest";
         /// <summary>
-        /// Response topic for ConnectionSyncRequest. The message must be a serialized json string of the class "Topic".
+        /// Response topic for ConnectionSyncRequest. The message will be a serialized json string of the class TopicRoom.
         /// </summary>
         public const string TopicSyncResponse = "TopicSyncResponse";
         /// <summary>
@@ -48,7 +48,9 @@ namespace MosquittoChat
         /// </summary>
         public const string ClientDisconnect = "ClientDisconnect";
 
-        // The topic that all users join on connection:
+        /// <summary>
+        /// The chat topic that all users join on connection
+        /// </summary>
         public const string DefaultMessagingTopic = "General";
 
         /// <summary>
@@ -84,19 +86,19 @@ namespace MosquittoChat
     {
         public TopicRoom(string topic) 
         { 
-            this.Topic = topic;
+            this.Topic        = topic;
             this.CreationTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            this.Users = new();
-            this.Messages = new();
+            this.Users        = new();
+            this.Messages     = new();
         }
 
         public string Topic { get; set; }
         /// <summary>
         /// The Unix millisecond timestamp of the TopicRoom creation.
         /// </summary>
-        public long CreationTime { get; set; }
-        public List<string> Users { get; set; }
-        public List<string> Messages { get; set; }
+        public long         CreationTime { get; set; }
+        public List<string> Users        { get; set; }
+        public List<string> Messages     { get; set; }
 
         public string SerializeJSON()
         {

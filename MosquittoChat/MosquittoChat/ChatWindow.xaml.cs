@@ -78,7 +78,7 @@ namespace MosquittoChat
 
                     case Topics.TopicSyncRequest:
                         var messageComponents = e.Message.Split("/");
-                        var syncTopic = messageComponents[0];
+                        var syncTopic    = messageComponents[0];
                         var syncUsername = messageComponents[1];
 
                         if (this.connectedRooms.ContainsKey(syncTopic))
