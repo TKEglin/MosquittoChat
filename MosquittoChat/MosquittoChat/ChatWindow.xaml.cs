@@ -67,65 +67,64 @@ namespace MosquittoChat
             if (e.Topic == Topics.GenConfigTopic(specificTopic))
             {
                 Debug.WriteLine($"Client \"{this.username}\" received \"{specificTopic}\"");
-                    // If topic is configuration topic, check for which specific config topic is sent
-                    switch (specificTopic)
+                // If topic is configuration topic, check for which specific config topic is sent
+                switch (specificTopic)
                 {
-                    case Topics.UsernameUniquenessCheck:
-                        if (e.Message == this.username)
-                        {
-                            this.mqttClient.publish(
-                                Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{this.username}"),
-                                $"Username \"{this.username}\" is taken."
-                            );
-                        }
-                        break;
+                case Topics.UsernameUniquenessCheck:
+                    if (e.Message == this.username)
+                    {
+                        this.mqttClient.publish(
+                            Topics.GenConfigTopic($"{Topics.UsernameUniquenessCheck}/{this.username}"),
+                            $"Username \"{this.username}\" is taken."
+                        );
+                    }
+                    break;
 
-                    case Topics.TopicSyncRequest:
-                        var messageComponents = e.Message.Split("/");
-                        var syncTopic    = messageComponents[0];
-                        var syncUsername = messageComponents[1];
+                case Topics.TopicSyncRequest:
+                    var messageComponents = e.Message.Split("/");
+                    var syncTopic    = messageComponents[0];
+                    var syncUsername = messageComponents[1];
 
-                        if (this.connectedRooms.ContainsKey(syncTopic))
-                        {
-                            // Sending client's username is added to the topic room
-                            if(!connectedRooms[syncTopic].Users.Contains(syncUsername))
-                                connectedRooms[syncTopic].Users.Add(syncUsername);
-                            ReloadUsersView();
+                    if (this.connectedRooms.ContainsKey(syncTopic))
+                    {
+                        // Sending client's username is added to the topic room
+                        if(!connectedRooms[syncTopic].Users.Contains(syncUsername))
+                            connectedRooms[syncTopic].Users.Add(syncUsername);
 
-                            // Sending room data to requesting client:
-                            var TopicJSON = connectedRooms[syncTopic].SerializeJSON();
-                            this.mqttClient.publish(Topics.GenConfigTopic(Topics.TopicSyncResponse), TopicJSON);
-                        }
-                        break;
+                        ReloadUsersView();
 
-                    case Topics.TopicSyncResponse:
-                        TopicRoom room = TopicRoom.DeserializeJSON(e.Message);
-                        var topic = room.Topic;
+                        // Sending room data to requesting client:
+                        var TopicRoomJSON = connectedRooms[syncTopic].SerializeJSON();
+                        this.mqttClient.publish(Topics.GenConfigTopic(Topics.TopicSyncResponse), TopicRoomJSON);
+                    }
+                    break;
+
+                case Topics.TopicSyncResponse:
+                    TopicRoom room = TopicRoom.DeserializeJSON(e.Message);
+                    var topic = room.Topic;
                         
-                        if (this.connectedRooms.ContainsKey(topic) 
-                            // Only replace room if the response message contains an older version of the room:
-                            && connectedRooms[topic].CreationTime > room.CreationTime)
+                    if (this.connectedRooms.ContainsKey(topic) 
+                        // Only replace room if the response message contains an older version of the room:
+                        && connectedRooms[topic].CreationTime > room.CreationTime)
+                    {
+                        this.connectedRooms[topic] = room;
+                        if (topic == activeTopic)
                         {
-                            this.connectedRooms[topic] = room;
-                            if (topic == activeTopic)
-                            {
-                                ReloadMessageView();
-                                ReloadUsersView();
-                            }
+                            ReloadMessageView();
+                            ReloadUsersView();
                         }
-                        break;
+                    }
+                    break;
 
-                    case Topics.ClientDisconnect:
-                        foreach(var r in connectedRooms.Values)
-                        {
-                            var disconnectingUsername = e.Message;
-                            //if(r.Users.Contains(disconnectingUsername)) 
-                            {
-                                r.Users.Remove(disconnectingUsername);
-                                ReloadUsersView();
-                            }
-                        }
-                        break;
+                case Topics.ClientDisconnect:
+                    foreach(var r in connectedRooms.Values)
+                    {
+                        var disconnectingUsername = e.Message;
+
+                        r.Users.Remove(disconnectingUsername);
+                        ReloadUsersView();
+                    }
+                    break;
                 }
             }
             else if (e.Topic == Topics.GenMessageTopic(specificTopic))

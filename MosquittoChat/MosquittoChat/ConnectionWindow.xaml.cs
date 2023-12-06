@@ -31,11 +31,13 @@ namespace MosquittoChat
             InitializeComponent();
         }
 
-        private void connectButtonClick(object sender, RoutedEventArgs e)
+        private void ConnectButtonClicked(object sender, RoutedEventArgs e)
         {
             var IP = IP_textbox.Text;
             var port = Int32.Parse(port_textbox.Text);
             var username = username_textbox.Text;
+
+            if (username.Length == 0) return;
 
             try
             {
@@ -45,7 +47,7 @@ namespace MosquittoChat
                 this.mqttClient.connect(IP, port);
 
                 this.Cursor = Cursors.Wait;
-                Thread.Sleep(500);
+                Thread.Sleep(MCConsts.NetworkTimeLimit);
 
                 // Verifying that messages can be published to server:
                 this.mqttClient.publish(Topics.GenConfigTopic(Topics.ConnectionCheck), username);
@@ -59,7 +61,7 @@ namespace MosquittoChat
                     // 1. mqttClient is subscribed to no other topic than the UniqueCheck/username topic above
                     // 2. A message will only be published to this topic if the username is taken
 
-                    usernameValid = false; // Note: potential threading problems
+                    usernameValid = false;
                 };
                 this.mqttClient.publish(Topics.GenConfigTopic(Topics.UsernameUniquenessCheck), username);
 
@@ -79,10 +81,10 @@ namespace MosquittoChat
                 chatWindow.Show();
 
                 // Normal operation:
-                this.Close();
+                //this.Close();
 
                 // Multiclient testing:
-                //this.mqttClient = new MqttClient();
+                this.mqttClient = new MqttClient();
             }
             catch(Exception ex)
             { 
@@ -93,7 +95,7 @@ namespace MosquittoChat
             }
         }
 
-        private void closeButtonClick(object sender, RoutedEventArgs e)
+        private void CloseButtonClick(object sender, RoutedEventArgs e)
         {
             this.Close();
         }

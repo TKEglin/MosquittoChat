@@ -11,10 +11,10 @@
         <Label x:Name="IP_label" Content="IP" HorizontalAlignment="Left" Margin="10,0,0,55" VerticalAlignment="Bottom" Height="26" Width="20"/>
         <Label x:Name="port_label" Content="Port" HorizontalAlignment="Right" Margin="0,0,10,55" VerticalAlignment="Bottom" Height="26" Width="32"/>
         <TextBox x:Name="port_textbox" HorizontalAlignment="Right" Margin="0,0,10,37" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="185" Text="1883" Height="18"/>
-        <TextBox x:Name="IP_textbox" HorizontalAlignment="Left" Margin="10,0,0,37" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="185" Text="127.0.0.1" Height="18"/>
+        <TextBox x:Name="IP_textbox" HorizontalAlignment="Left" Margin="10,0,0,37" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="185" Text="test.mosquitto.org" Height="18"/>
         <Image HorizontalAlignment="Center" Height="160" Margin="0,9,0,0" VerticalAlignment="Top" Width="260" Source="/Images/MosquittoChatLogoTransparent.png" Stretch="Fill"/>
-        <Button x:Name="closeButton" Click="closeButtonClick" Content="Close" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
-        <Button x:Name="connectButton" Click="connectButtonClick" Content="Connect" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
+        <Button x:Name="closeButton" Click="CloseButtonClick" Content="Close" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
+        <Button x:Name="connectButton" Click="ConnectButtonClicked" Content="Connect" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Background="White" Padding="5,2,5,2" Height="22" Width="56"/>
         <TextBox x:Name="username_textbox" HorizontalAlignment="Center" Margin="0,200,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="378" Text="User1" Height="18"/>
         <Label x:Name="username_label" Content="Username" HorizontalAlignment="Center" Margin="0,174,0,0" VerticalAlignment="Top" Height="26"/>
 
